@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Student Queue - Join</title>
+<style>
+body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+input, button { font-size: 1.2em; padding: 10px; margin: 5px; }
+#queuePosition { margin-top: 20px; font-size: 1.2em; }
+</style>
+</head>
+<body>
+<h1>Join the Queue</h1>
+<input type="text" id="nameInput" placeholder="Enter your name" />
+<br>
+<button id="joinBtn">Join Queue</button>
+<button id="finishBtn" style="display:none;">Finished</button>
+<div id="queuePosition"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+const nameInput = document.getElementById('nameInput');
+const joinBtn = document.getElementById('joinBtn');
+const finishBtn = document.getElementById('finishBtn');
+const queuePosition = document.getElementById('queuePosition');
+
+let joined = false;
+
+joinBtn.onclick = () => {
+  const name = nameInput.value.trim();
+  if (name) {
+    socket.emit('join_queue', name);
+    joined = true;
+    joinBtn.disabled = true;
+    finishBtn.style.display = 'inline-block';
+  } else {
+    alert('Please enter your name');
+  }
+};
+
+finishBtn.onclick = () => {
+  socket.emit('remove_self');
+  joined = false;
+  joinBtn.disabled = false;
+  finishBtn.style.display = 'none';
+  queuePosition.textContent = '';
+};
+
+socket.on('queue_update', (queue) => {
+  if (joined) {
+    const index = queue.findIndex(entry => entry.id === socket.id);
+    if (index !== -1) {
+      queuePosition.textContent = `You are number ${index + 1} in the queue.`;
+    } else {
+      // Removed from queue externally
+      joined = false;
+      joinBtn.disabled = false;
+      finishBtn.style.display = 'none';
+      queuePosition.textContent = '';
+    }
+  }
+});
+</script>
+</body>
+</html>

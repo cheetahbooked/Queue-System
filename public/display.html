@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Queue Display</title>
+<style>
+body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; }
+h1 { font-size: 2em; }
+#queueList { margin-top: 20px; font-size: 1.5em; list-style: none; padding: 0; }
+#queueList li { padding: 10px; border-bottom: 1px solid #ccc; }
+#queueList li:first-child { background-color: #d4edda; font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>Current Queue</h1>
+<ul id="queueList"></ul>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const queueList = document.getElementById('queueList');
+
+socket.on('queue_update', (queue) => {  
+  queueList.innerHTML = '';
+  queue.forEach((entry, index) => {
+    const li = document.createElement('li');
+    li.textContent = `${index + 1}. ${entry.name}`;
+    queueList.appendChild(li);
+  });
+});
+</script>
+</body>
+</html>
